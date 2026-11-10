@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:emerald_ore",
+  "result": {
+    "id": "minecraft:deepslate_emerald_ore"
+  }
+}

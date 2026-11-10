@@ -1,0 +1,40 @@
+// Shared settings for the two loader projects. Each one's own build.gradle says how it builds;
+// versions live in gradle.properties.
+subprojects {
+	apply plugin: 'java'
+
+	group = rootProject.group
+	version = rootProject.version
+
+	repositories {
+		mavenCentral()
+	}
+
+	tasks.withType(JavaCompile).configureEach {
+		it.options.release = 25
+		it.options.encoding = 'UTF-8'
+	}
+
+	java {
+		sourceCompatibility = JavaVersion.VERSION_25
+		targetCompatibility = JavaVersion.VERSION_25
+	}
+
+	def licenseSuffix = "_" + rootProject.name
+	jar {
+		from(rootProject.file('LICENSE')) {
+			rename { it + licenseSuffix }
+		}
+	}
+}
+
+// `./gradlew datapack`: pack/ zipped as a vanilla data pack, for players with no mod loader.
+// It is the same folder both jars carry, so the three downloads can't drift apart.
+tasks.register('datapack', Zip) {
+	from 'pack'
+	from('LICENSE')
+	archiveFileName = "ore-cutter-${project.version}-datapack.zip"
+	destinationDirectory = layout.buildDirectory.dir('dist')
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}

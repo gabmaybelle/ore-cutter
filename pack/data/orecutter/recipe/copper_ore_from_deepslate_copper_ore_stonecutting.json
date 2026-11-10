@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:deepslate_copper_ore",
+  "result": {
+    "id": "minecraft:copper_ore"
+  }
+}

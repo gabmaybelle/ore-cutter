@@ -1,0 +1,58 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// The mod has no code: the jar is pack/ (the recipes) plus fabric.mod.json.
+sourceSets.main {
+	resources.srcDir rootProject.file('pack')
+}
+
+loom {
+	mods {
+		"orecutter" {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	// Fabric API is what reads a mod's recipes into the game, and what runs the game test.
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// `-PextraMods=<folder>`: also load every jar in that folder in the game test, to check the
+	// recipes still show beside other mods (another stonecutter mod, a recipe viewer).
+	if (project.hasProperty("extraMods")) {
+		runtimeOnly fileTree(project.extraMods) { include "*.jar" }
+	}
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+// ore-cutter-fabric-<version>.jar, the name players download.
+tasks.named('jar') { archiveBaseName = "${rootProject.name}-fabric" }
+
+// Client game test: `./gradlew :fabric:runClientGameTest` starts a real game, opens a stonecutter
+// and cuts every ore both ways (src/gametest). Nothing there ships in the jar.
+//   -PextraMods=<folder>  also load those jars (see above)
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "orecutter_gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}
+
+// The test reads the recipes it expects from pack/ itself, so a jar that lost one fails.
+tasks.withType(JavaExec).configureEach {
+	systemProperty "orecutter.expect", rootProject.file('pack').absolutePath
+}

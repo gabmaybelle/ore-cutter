@@ -1,0 +1,168 @@
+# Builds Ore Cutter on every push and pull request, then tests what it built:
+# - build: the Fabric and NeoForge jars and the data pack zip, all made from pack/. Attached as
+#   "Downloads".
+# - load: real dedicated servers (Fabric, NeoForge and plain vanilla with the data pack) must load
+#   with no data errors and with Ore Cutter's recipes switched on; Fabric and NeoForge also beside
+#   Cozy Core and JEI.
+# - game: the in-game test (fabric/src/gametest) opens a real stonecutter and cuts every ore both
+#   ways, on its own and beside Cozy Core and JEI.
+# - game (NeoForge): vanilla's test server runs the checks in neoforge/src/gametest: every recipe
+#   in pack/ is in the game and the stonecutter offers each ore its twin, on its own and beside
+#   Cozy Core and JEI.
+
+name: build
+on:
+  pull_request:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'art/**'
+      - 'LICENSE'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    # A pull request from a branch in this repo is already built by its push; only build forks' twice.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: setup gradle (with caching)
+        uses: gradle/actions/setup-gradle@v6
+      - name: the mods and the data pack
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build datapack
+          mkdir dist
+          cp fabric/build/libs/ore-cutter-fabric-*.jar neoforge/build/libs/ore-cutter-neoforge-*.jar build/dist/*.zip dist/
+          ls dist/
+      - name: capture the downloads
+        uses: actions/upload-artifact@v7
+        with:
+          name: Downloads
+          path: dist/
+
+  load:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { loader: fabric, extra: none, name: 'Fabric' }
+          - { loader: fabric, extra: extra, name: 'Fabric with Cozy Core and JEI' }
+          - { loader: neoforge, extra: none, name: 'NeoForge' }
+          - { loader: neoforge, extra: extra, name: 'NeoForge with Cozy Core and JEI' }
+          - { loader: vanilla, extra: none, name: 'vanilla with the data pack' }
+    name: load (${{ matrix.name }})
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: the downloads
+        uses: actions/download-artifact@v8
+        with:
+          name: Downloads
+          path: dist/
+      - name: load test
+        timeout-minutes: 15
+        run: bash tools/ci-load-test.sh ${{ matrix.loader }} ${{ matrix.extra }}
+
+  game:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { extra: none, name: 'on its own' }
+          - { extra: extra, name: 'with Cozy Core and JEI' }
+    name: game (${{ matrix.name }})
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: setup gradle (with caching)
+        uses: gradle/actions/setup-gradle@v6
+      - name: the mods to test beside
+        if: matrix.extra == 'extra'
+        run: bash tools/fetch-extra-mods.sh fabric ~/extra
+      - name: install EGL
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libegl1 libegl-mesa0
+      - name: game test
+        # 26.3 asks for an sRGB-capable window, which Xvfb's GLX can't give, so the game would hang
+        # at startup. Mesa's EGL can; SDL uses it with this set.
+        env:
+          SDL_VIDEO_FORCE_EGL: '1'
+        timeout-minutes: 30
+        run: |
+          chmod +x ./gradlew
+          args=""
+          if [ "${{ matrix.extra }}" = extra ]; then args="-PextraMods=$HOME/extra"; fi
+          xvfb-run -a ./gradlew :fabric:runClientGameTest $args
+      - name: capture the screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Game test screenshots (${{ matrix.name }})
+          path: fabric/build/run/clientGameTest/screenshots/
+          if-no-files-found: ignore
+
+  game-neoforge:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { extra: none, name: 'on its own' }
+          - { extra: extra, name: 'with Cozy Core and JEI' }
+    name: game (NeoForge, ${{ matrix.name }})
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: setup gradle (with caching)
+        uses: gradle/actions/setup-gradle@v6
+      - name: the mods to test beside
+        if: matrix.extra == 'extra'
+        run: bash tools/fetch-extra-mods.sh neoforge ~/extra
+      - name: game test
+        # A dedicated test server: no window, so no virtual display needed. With the extra mods,
+        # they must load (-PexpectMods) and the ores must still cut.
+        timeout-minutes: 20
+        run: |
+          chmod +x ./gradlew
+          args=""
+          if [ "${{ matrix.extra }}" = extra ]; then
+            args="-PextraMods=$HOME/extra -PexpectMods=$(bash tools/fetch-extra-mods.sh neoforge --ids)"
+          fi
+          ./gradlew :neoforge:runGameTestServer $args

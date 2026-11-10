@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:gold_ore",
+  "result": {
+    "id": "minecraft:deepslate_gold_ore"
+  }
+}

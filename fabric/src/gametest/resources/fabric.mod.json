@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "orecutter_gametest",
+	"version": "1.0.0",
+	"name": "Ore Cutter game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.gabbymaybelle.orecutter.gametest.StonecutterTest"
+		]
+	},
+	"depends": {
+		"orecutter": "*"
+	}
+}

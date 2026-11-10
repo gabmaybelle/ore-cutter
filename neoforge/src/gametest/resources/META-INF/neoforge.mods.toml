@@ -1,0 +1,16 @@
+# Ore Cutter's NeoForge game tests. Only `./gradlew :neoforge:runGameTestServer` loads this mod;
+# nothing here ships in the jar.
+license = "MIT"
+
+[[mods]]
+modId = "orecutter_gametest"
+version = "1.0.0"
+displayName = "Ore Cutter game tests"
+description = '''Checks that the stonecutter offers every ore its twin, for vanilla's test framework.'''
+
+[[dependencies.orecutter_gametest]]
+modId = "orecutter"
+type = "required"
+versionRange = "[0,)"
+ordering = "AFTER"
+side = "BOTH"
