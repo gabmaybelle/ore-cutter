@@ -6,7 +6,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-client-gametest": [
-			"com.gabbymaybelle.orecutter.gametest.StonecutterTest"
+			"com.gabbymaybelle.orecutter.gametest.StonecutterTest",
+			"com.gabbymaybelle.orecutter.gametest.Screenshots"
 		]
 	},
 	"depends": {

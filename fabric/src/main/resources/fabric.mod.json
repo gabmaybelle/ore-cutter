@@ -13,6 +13,7 @@
 		"issues": "https://github.com/gabmaybelle/ore-cutter/issues"
 	},
 	"license": "MIT",
+	"icon": "pack.png",
 	"environment": "*",
 	"depends": {
 		"fabricloader": ">=0.19.5",

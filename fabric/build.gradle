@@ -55,4 +55,9 @@ fabricApi {
 // The test reads the recipes it expects from pack/ itself, so a jar that lost one fails.
 tasks.withType(JavaExec).configureEach {
 	systemProperty "orecutter.expect", rootProject.file('pack').absolutePath
+	// -Pscreenshots also takes the mod page's pictures (src/gametest Screenshots), into
+	// build/run/clientGameTest/screenshots.
+	if (project.hasProperty("screenshots")) {
+		systemProperty "orecutter.screenshots", "true"
+	}
 }

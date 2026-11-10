@@ -108,7 +108,7 @@ public class StonecutterTest implements FabricClientGameTest {
 	 * Puts 64 of the item in the stonecutter's input (emptying the player's hands and inventory
 	 * first) and waits for the screen to offer something. False if it never does.
 	 */
-	private static boolean putInInput(ClientGameTestContext ctx, TestServerContext server, Item item) {
+	static boolean putInInput(ClientGameTestContext ctx, TestServerContext server, Item item) {
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.getInventory().clearContent();
@@ -129,7 +129,7 @@ public class StonecutterTest implements FabricClientGameTest {
 	}
 
 	/** Picks the recipe button at this index: with the real mouse when it's on the first page, else as the screen would. */
-	private static void select(ClientGameTestContext ctx, int index) {
+	static void select(ClientGameTestContext ctx, int index) {
 		if (index < COLUMNS * ROWS) {
 			int[] at = ctx.computeOnClient(mc -> {
 				AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) mc.gui.screen();
@@ -160,7 +160,7 @@ public class StonecutterTest implements FabricClientGameTest {
 	}
 
 	/** The outputs the stonecutter screen is offering, in button order. */
-	private static List<Identifier> offered(Minecraft mc) {
+	static List<Identifier> offered(Minecraft mc) {
 		StonecutterMenu menu = (StonecutterMenu) mc.player.containerMenu;
 		List<Identifier> out = new ArrayList<>();
 		for (SelectableRecipe.SingleInputEntry<StonecutterRecipe> entry : menu.getVisibleRecipes().entries()) {
