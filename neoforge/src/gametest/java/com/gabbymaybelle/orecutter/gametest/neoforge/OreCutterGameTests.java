@@ -35,6 +35,7 @@ public final class OreCutterGameTests {
 	static {
 		FUNCTIONS.put("every_recipe_is_in_the_game", RecipeChecks::recipesLoaded);
 		FUNCTIONS.put("every_ore_cuts_to_its_twin", RecipeChecks::cuts);
+		FUNCTIONS.put("every_deepslate_ore_is_crafted_from_a_block", RecipeChecks::crafts);
 	}
 
 	public OreCutterGameTests(IEventBus modBus) {

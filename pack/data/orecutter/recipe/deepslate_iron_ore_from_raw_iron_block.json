@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:raw_iron_block",
+    "minecraft:deepslate"
+  ],
+  "result": {
+    "id": "minecraft:deepslate_iron_ore"
+  }
+}

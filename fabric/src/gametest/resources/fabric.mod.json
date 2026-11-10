@@ -7,6 +7,7 @@
 	"entrypoints": {
 		"fabric-client-gametest": [
 			"com.gabbymaybelle.orecutter.gametest.StonecutterTest",
+			"com.gabbymaybelle.orecutter.gametest.CraftingTest",
 			"com.gabbymaybelle.orecutter.gametest.Screenshots"
 		]
 	},

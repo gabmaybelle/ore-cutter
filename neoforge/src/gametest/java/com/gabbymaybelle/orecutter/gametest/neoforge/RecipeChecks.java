@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -13,7 +14,11 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SelectableRecipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
@@ -24,10 +29,47 @@ final class RecipeChecks {
 	/** The ores with a deepslate twin. Written out here, not read from pack/, so a lost file fails. */
 	private static final List<String> ORES = List.of("coal", "copper", "iron", "gold", "redstone", "emerald", "lapis", "diamond");
 
+	/** What each deepslate ore is crafted from, with one deepslate: a whole block of its material, and the single piece that must not be enough. */
+	private static final Map<String, String[]> CRAFTED_FROM = Map.of(
+			"coal", new String[] { "coal_block", "coal" }, "copper", new String[] { "raw_copper_block", "raw_copper" },
+			"iron", new String[] { "raw_iron_block", "raw_iron" }, "gold", new String[] { "raw_gold_block", "raw_gold" },
+			"redstone", new String[] { "redstone_block", "redstone" }, "emerald", new String[] { "emerald_block", "emerald" },
+			"lapis", new String[] { "lapis_block", "lapis_lazuli" }, "diamond", new String[] { "diamond_block", "diamond" });
+
 	private RecipeChecks() {
 	}
 
-	/** Every recipe file in pack/ is a recipe the game has, and there are two per ore. */
+	/**
+	 * What the crafting table does: a block of the material and a deepslate make exactly one of
+	 * that deepslate ore, and a single piece of the material with a deepslate does not.
+	 */
+	static void crafts(GameTestHelper helper) {
+		RecipeManager manager = helper.getLevel().getServer().getRecipeManager();
+		List<String> wrong = new ArrayList<>();
+		for (String ore : ORES) {
+			Item result = item("deepslate_" + ore + "_ore");
+			String block = CRAFTED_FROM.get(ore)[0], piece = CRAFTED_FROM.get(ore)[1];
+			ItemStack crafted = craft(helper, manager, block);
+			if (!crafted.is(result) || crafted.getCount() != 1) {
+				wrong.add(block + " and deepslate give " + crafted.getCount() + " " + BuiltInRegistries.ITEM.getKey(crafted.getItem()) + ", not 1 deepslate_" + ore + "_ore");
+			}
+			if (craft(helper, manager, piece).is(result)) {
+				wrong.add("a single " + piece + " and deepslate is enough for deepslate_" + ore + "_ore");
+			}
+		}
+		helper.assertTrue(wrong.isEmpty(), wrong.size() + " problem(s): " + String.join("; ", wrong));
+		System.out.println("[orecutter_gametest] " + ORES.size() + " crafting recipes checked, each costs a whole block");
+		helper.succeed();
+	}
+
+	/** What the crafting grid gives for this item beside one deepslate (empty when nothing). */
+	private static ItemStack craft(GameTestHelper helper, RecipeManager manager, String with) {
+		CraftingInput input = CraftingInput.of(2, 1, List.of(new ItemStack(item(with)), new ItemStack(item("deepslate"))));
+		return manager.getRecipeFor(RecipeType.CRAFTING, input, helper.getLevel())
+				.map(holder -> ((RecipeHolder<CraftingRecipe>) holder).value().assemble(input)).orElse(ItemStack.EMPTY);
+	}
+
+	/** Every recipe file in pack/ is a recipe the game has, and there are three per ore. */
 	static void recipesLoaded(GameTestHelper helper) {
 		Path recipes = Path.of(System.getProperty("orecutter.expect")).resolve("data/orecutter/recipe");
 		helper.assertTrue(Files.isDirectory(recipes), "no recipe folder at " + recipes);
@@ -45,7 +87,7 @@ final class RecipeChecks {
 		} catch (IOException e) {
 			throw new IllegalStateException("couldn't read the recipes in " + recipes, e);
 		}
-		helper.assertTrue(files == ORES.size() * 2, files + " recipe files in pack/, not " + ORES.size() * 2 + " (two per ore)");
+		helper.assertTrue(files == ORES.size() * 3, files + " recipe files in pack/, not " + ORES.size() * 3 + " (three per ore)");
 		helper.assertTrue(missing.isEmpty(), "not in the game: " + String.join(", ", missing));
 		// A run with other mods names them, so jars that didn't load fail here instead of passing without them.
 		for (String id : System.getProperty("orecutter.expectMods", "").split(",")) {

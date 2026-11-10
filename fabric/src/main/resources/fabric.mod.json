@@ -3,7 +3,7 @@
 	"id": "orecutter",
 	"version": "${version}",
 	"name": "Ore Cutter",
-	"description": "Any ore block becomes its deepslate twin in the stonecutter, and back again. No new ore is ever made: just the block you already have, in the colour your build needs.",
+	"description": "Craft deepslate ores from a block of their material and a piece of deepslate, or swap any ore with its deepslate twin in the stonecutter. Every ore you own, in stone or deepslate, whenever you like.",
 	"authors": [
 		"Gabby"
 	],

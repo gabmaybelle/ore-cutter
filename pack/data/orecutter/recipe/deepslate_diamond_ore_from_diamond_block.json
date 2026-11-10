@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:diamond_block",
+    "minecraft:deepslate"
+  ],
+  "result": {
+    "id": "minecraft:deepslate_diamond_ore"
+  }
+}

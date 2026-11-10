@@ -47,7 +47,7 @@ public class StonecutterTest implements FabricClientGameTest {
 	@Override
 	public void runTest(ClientGameTestContext ctx) {
 		int files = recipeFiles();
-		check(files == ORES.size() * 2, files + " recipe files in pack/, not " + ORES.size() * 2 + " (two per ore)");
+		check(files == ORES.size() * 3, files + " recipe files in pack/, not " + ORES.size() * 3 + " (three per ore)");
 		List<String> failures = new ArrayList<>();
 		int cuts = 0;
 		try (TestSingleplayerContext world = ctx.worldBuilder().create()) {

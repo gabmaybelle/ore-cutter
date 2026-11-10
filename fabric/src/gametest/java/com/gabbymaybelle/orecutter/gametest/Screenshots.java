@@ -88,6 +88,25 @@ public class Screenshots implements FabricClientGameTest {
 			ctx.runOnClient(mc -> mc.player.closeContainer());
 			ctx.waitTicks(5);
 
+			// The crafting table: a block of emerald and a deepslate make a deepslate emerald ore.
+			server.runCommand("tp @a -1.5 200 4.0 0 35");
+			ctx.waitTicks(10);
+			CraftingTest.openTable(ctx, server, new BlockPos(-2, 200, 6));
+			CraftingTest.fill(ctx, server, CraftingTest.item("emerald_block"));
+			server.runCommand("give @a minecraft:emerald_block 3");
+			server.runCommand("give @a minecraft:deepslate 16");
+			server.runCommand("give @a minecraft:diamond_block 2");
+			ctx.waitTicks(10);
+			ctx.runOnClient(mc -> {
+				mc.gui.hud.getChat().clearMessages(false);
+				mc.gui.toastManager().clear();
+				mc.player.getInventory().setSelectedSlot(8);
+			});
+			ctx.waitTicks(10);
+			ctx.takeScreenshot("4_crafting_deepslate_emerald_ore");
+			ctx.runOnClient(mc -> mc.player.closeContainer());
+			ctx.waitTicks(5);
+
 			// The same workstation with the ore swapped for its twin.
 			server.runCommand("setblock 2 200 6 minecraft:deepslate_emerald_ore");
 			server.runCommand("clear @a");

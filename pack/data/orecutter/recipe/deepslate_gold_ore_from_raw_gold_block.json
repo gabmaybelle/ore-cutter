@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:raw_gold_block",
+    "minecraft:deepslate"
+  ],
+  "result": {
+    "id": "minecraft:deepslate_gold_ore"
+  }
+}
