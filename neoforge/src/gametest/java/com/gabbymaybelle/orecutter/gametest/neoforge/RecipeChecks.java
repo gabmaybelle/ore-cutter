@@ -36,6 +36,9 @@ final class RecipeChecks {
 			"redstone", new String[] { "redstone_block", "redstone" }, "emerald", new String[] { "emerald_block", "emerald" },
 			"lapis", new String[] { "lapis_block", "lapis_lazuli" }, "diamond", new String[] { "diamond_block", "diamond" });
 
+	/** The metals whose ore can also be crafted from the smelted block. */
+	private static final Map<String, String> SMELTED_BLOCK = Map.of("iron", "iron_block", "gold", "gold_block", "copper", "copper_block");
+
 	private RecipeChecks() {
 	}
 
@@ -52,6 +55,11 @@ final class RecipeChecks {
 			ItemStack crafted = craft(helper, manager, block);
 			if (!crafted.is(result) || crafted.getCount() != 1) {
 				wrong.add(block + " and deepslate give " + crafted.getCount() + " " + BuiltInRegistries.ITEM.getKey(crafted.getItem()) + ", not 1 deepslate_" + ore + "_ore");
+			}
+			// The three metals also take their smelted block, the one most players reach for first.
+			String smelted = SMELTED_BLOCK.get(ore);
+			if (smelted != null && !craft(helper, manager, smelted).is(result)) {
+				wrong.add(smelted + " and deepslate don't give deepslate_" + ore + "_ore");
 			}
 			if (craft(helper, manager, piece).is(result)) {
 				wrong.add("a single " + piece + " and deepslate is enough for deepslate_" + ore + "_ore");

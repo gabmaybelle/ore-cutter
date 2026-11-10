@@ -8,8 +8,8 @@ its material and a piece of deepslate, or put an ore block in the stonecutter an
 ## What it does
 
 - **Craft deepslate ores.** A block of the material plus one deepslate, anywhere in the crafting
-  grid, makes the deepslate ore: block of coal, raw copper, raw iron, raw gold, redstone, emerald,
-  lapis or diamond.
+  grid, makes the deepslate ore: block of coal, copper, iron, gold, redstone, emerald, lapis or
+  diamond. For copper, iron and gold, the smelted block and the raw block both work.
 - **Swap in the stonecutter.** Coal, copper, iron, gold, redstone, emerald, lapis and diamond ore
   each cut to their deepslate twin, and each deepslate ore cuts back. One block in, one block out.
 - **Fair by design.** A crafted ore costs a whole block, so diamonds, emeralds, iron and gold stay

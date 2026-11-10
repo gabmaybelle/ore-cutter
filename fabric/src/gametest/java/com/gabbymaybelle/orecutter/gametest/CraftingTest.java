@@ -35,6 +35,8 @@ public class CraftingTest implements FabricClientGameTest {
 			"iron", new String[] { "raw_iron_block", "raw_iron" }, "gold", new String[] { "raw_gold_block", "raw_gold" },
 			"redstone", new String[] { "redstone_block", "redstone" }, "emerald", new String[] { "emerald_block", "emerald" },
 			"lapis", new String[] { "lapis_block", "lapis_lazuli" }, "diamond", new String[] { "diamond_block", "diamond" });
+	/** The metals whose ore can also be crafted from the smelted block. */
+	static final Map<String, String> SMELTED_BLOCK = Map.of("iron", "iron_block", "gold", "gold_block", "copper", "copper_block");
 	/** The crafting table menu's slots: the result, then the grid from its top left. */
 	private static final int RESULT = 0, GRID = 1;
 
@@ -64,6 +66,14 @@ public class CraftingTest implements FabricClientGameTest {
 				int left = server.computeOnServer(s -> player(s).containerMenu.getSlot(GRID).getItem().getCount() + player(s).containerMenu.getSlot(GRID + 1).getItem().getCount());
 				if (carried != 1 || left != 0) {
 					failures.add(block + ": taking the ore should give 1 and use both ingredients, but gave " + carried + " and left " + left);
+				}
+				// The three metals also take their smelted block, the one most players reach for first.
+				String smelted = SMELTED_BLOCK.get(entry.getKey());
+				if (smelted != null) {
+					fill(ctx, server, item(smelted));
+					if (!result(ctx).is(ore)) {
+						failures.add(smelted + " and deepslate don't give deepslate_" + entry.getKey() + "_ore");
+					}
 				}
 				// A single piece and a deepslate: not this ore.
 				fill(ctx, server, item(piece));
