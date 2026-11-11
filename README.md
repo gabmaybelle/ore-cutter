@@ -25,6 +25,6 @@ its material and a piece of deepslate, or put an ore block in the stonecutter an
 - **Playing without a mod loader:** `ore-cutter-<version>-datapack.zip` goes in your world's
   `datapacks` folder. It holds the same recipes.
 
-**Download:** [GitHub releases](https://github.com/gabmaybelle/ore-cutter/releases)
+**Download:** [CurseForge](https://www.curseforge.com/minecraft/mc-mods/ore-cutter) · [GitHub releases](https://github.com/gabmaybelle/ore-cutter/releases)
 
 Made by Gabby. MIT licence.
